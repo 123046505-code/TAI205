@@ -1,8 +1,11 @@
 ﻿#1. Importaciones
 from fastapi import FastAPI
-from app.routers import usuarios, varios
+from app.routers.varios import routerV
+from app.routers.usuarios import routerU
+from app.data.db import engine
+from app.data import usuario
 
-
+usuario.Base.metadata.create_all(bind=engine)
 
 #2. Inicializacion APP
 app= FastAPI(
@@ -11,5 +14,5 @@ app= FastAPI(
     version="1.0"
     )
 
-app.include_router(usuarios.routerU)
-app.include_router(varios.routerV)
+app.include_router(routerU)
+app.include_router(routerV)

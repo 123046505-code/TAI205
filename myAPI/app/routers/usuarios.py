@@ -2,12 +2,25 @@ from fastapi import APIRouter, status,HTTPException, Depends
 from app.data.database import usuarios
 from app.models.usuarios import crear_usuario
 from app.security.auth import verificar_peticion
+from sqlalchemy.orm import Session
+from app.data.db import get_db
+from app.data.usuario import usuario as usuarioDB
+
 
 
 routerU= APIRouter(
     prefix="/v1/usuarios",
     tags=['CRUD HTTP']
 )
+
+@routerU.get("/")
+async def leer_usuarios(db: Session = Depends(get_db)):
+    queryUsuarios = db.query(usuarioDB).all()
+    return {
+        "status": "200",
+        "total": len(queryUsuarios),
+        "data": queryUsuarios
+    }
 
 
 @routerU.get("/")
@@ -16,6 +29,18 @@ async def cosultaT():
         "status":"200",
         "total": len(usuarios),
         "data":usuarios
+    }
+@routerU.post("/", status_code=status.HTTP_201_CREATED)
+async def crear_usuarios(usuarioP: crear_usuario, db: Session = Depends(get_db)):
+    
+    suarioNuevo = usuarioDB(nombre=usuarioP.nombre, edad=usuarioP.edad)
+    db.add(suarioNuevo)
+    db.commit()
+    db.refresh(suarioNuevo)
+    return {
+        "mensaje": "Usuario agregado correctamente",
+        "status": "200",
+        "usuario": suarioNuevo
     }
     
 @routerU.post("/", status_code=status.HTTP_201_CREATED)
